@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -123,18 +124,6 @@ public class Player : MonoBehaviour
         timeSinceLastSlide += Time.deltaTime;
     }
 
-    // walljump function
-    private void OnControllerColliderHit(ControllerColliderHit hit) {
-        if(!_controller.isGrounded && hit.normal.y < .1f){
-            if(Input.GetKey(KeyCode.Space)) {
-                Debug.DrawRay(hit.point,hit.normal,Color.red,1.25f);
-                moveSpeedBeforeJump = _wallJumpSpeed;
-                speedVector.y = _wallJumpForce;
-                movementVector = Vector3.ClampMagnitude(Vector3.Reflect(movementVector,hit.normal)+hit.normal*moveSpeedBeforeJump/2,moveSpeedBeforeJump);
-            }
-        }
-    }
-
     void SlideMovement() {
         movementVector = Vector3.Normalize(movementVector);
         float preserveY = speedVector.y;
@@ -147,6 +136,28 @@ public class Player : MonoBehaviour
             currentSlideSpeed = _slideSpeed;
         }
         timeSinceLastSlide = 0;
+    }
+
+    // walljump function
+    private void OnControllerColliderHit(ControllerColliderHit hit) {
+        if(!_controller.isGrounded && hit.normal.y < .1f){
+            Debug.DrawRay(hit.point,hit.normal,Color.red,1.25f);
+            if(Input.GetKey(KeyCode.Space)) {
+                moveSpeedBeforeJump = _wallJumpSpeed;
+                speedVector.y = _wallJumpForce;
+                movementVector = Vector3.ClampMagnitude(Vector3.Reflect(movementVector,hit.normal)+hit.normal*moveSpeedBeforeJump/2,moveSpeedBeforeJump);
+            }
+        }
+    }
+
+    void OnTriggerEnter(Collider collider) {
+        if(collider.gameObject.name == "KillPlane") {
+            GameEvents.InvokeGameOver();
+        } else if(collider.gameObject.name == "Start") {
+            GameEvents.InvokeLevelStart();
+        } else if(collider.gameObject.name == "Finish") {
+            GameEvents.InvokeLevelFinish();
+        }
     }
 
     void SwapWeapons() {

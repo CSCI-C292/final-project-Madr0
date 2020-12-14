@@ -18,6 +18,7 @@ public class Gun : MonoBehaviour
     [SerializeField] public GameObject _impactEffectBlood;
     [SerializeField] public AudioSource _soundManager;
     [SerializeField] public AudioClip _gunSound;
+    [SerializeField] public RuntimeData _runtimeData;
 
     protected float nextTimeToFire = 0f;
     protected Vector3 smoothDownVelocity;
@@ -32,9 +33,14 @@ public class Gun : MonoBehaviour
         _muzzelFlash.Play();
         RaycastHit hit;
         if (Physics.Raycast(_camera.transform.position, _camera.transform.forward, out hit, _range)) {
-            GameObject impactGO;
-            impactGO = Instantiate(_impactEffectMetal, hit.point, Quaternion.LookRotation(hit.normal));
-            Destroy(impactGO,2.0f);
+            Target target = hit.transform.GetComponent<Target>();
+            if (target != null) {
+                target.TakeDamage(_damage);
+            } else {
+                GameObject impactGO;
+                impactGO = Instantiate(_impactEffectMetal, hit.point, Quaternion.LookRotation(hit.normal));
+                Destroy(impactGO,2.0f);
+            }
         }
     }
 
@@ -61,7 +67,6 @@ public class Gun : MonoBehaviour
     }
 
     protected void calcRecoil(float mult) {
-        
         _gunModel.transform.localPosition = Vector3.SmoothDamp(_gunModel.transform.localPosition, gunInitialPos, ref smoothDownVelocity, 1f/(_fireRate*mult));
         recoilAngle = Mathf.SmoothDamp(recoilAngle, 0, ref angleSmoothDownVelocity, 1f/(_fireRate*mult));
         _gunModel.transform.localEulerAngles = new Vector3(recoilAngle,-6,0);

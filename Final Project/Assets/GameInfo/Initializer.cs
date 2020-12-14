@@ -7,6 +7,6 @@ public class Initializer : MonoBehaviour
     [SerializeField] RuntimeData _runtimeData;
 
     void Awake() {
-        
+        _runtimeData.currentScore = 1000;
     }
 }
